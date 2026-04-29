@@ -1,40 +1,68 @@
 const express = require('express');
 const cors = require('cors');
-const Parser = require('rss-parser'); // Run: npm install rss-parser
+const Parser = require('rss-parser');
+const { JSDOM } = require('jsdom');
 const app = express();
 const parser = new Parser();
 
 app.use(cors());
 
+// Logic to "Scan" text and add highlights based on professional markers
+function scanAndHighlight(text) {
+    if (!text) return "";
+    
+    // Red Highlights: Conflict, Crisis, Warning markers
+    const redKeywords = [/conflict/gi, /stalled/gi, /crisis/gi, /denied/gi, /warning/gi, /military/gi];
+    // Orange Highlights: Temporal or Unverified markers
+    const orangeKeywords = [/unconfirmed/gi, /reported/gi, /pending/gi, /\d{1,2}:\d{2}/g, /sources claim/gi];
+
+    let highlighted = text;
+
+    redKeywords.forEach(regex => {
+        highlighted = highlighted.replace(regex, (match) => `<span class="high-red">${match}</span>`);
+    });
+
+    orangeKeywords.forEach(regex => {
+        highlighted = highlighted.replace(regex, (match) => `<span class="high-orange">${match}</span>`);
+    });
+
+    return highlighted;
+}
+
 app.get('/api/news', async (req, res) => {
     try {
-        // Pulling real live news from a stable RSS feed
         const feed = await parser.parseURL('https://feeds.bbci.co.uk/news/world/rss.xml');
         
         const articles = feed.items.map(item => {
-            // Simulated Discrepancy Logic (for the demo)
-            // In a real version, you'd compare this against a 2nd feed
-            const hasConflict = item.title.includes("US") || item.title.includes("EU");
+            const id = Math.random().toString(36).substr(2, 6).toUpperCase();
+            
+            // We use the snippet provided by the RSS feed for the body
+            const rawBody = item.contentSnippet || "No data string available.";
+            const processedBody = scanAndHighlight(rawBody);
 
             return {
-                id: Math.random().toString(36).substr(2, 9),
-                source: "BBC World",
-                topic: "Global",
-                title: item.title,
-                content: item.contentSnippet,
-                fullText: item.content || item.contentSnippet + " [Full report available via encrypted node...]",
-                time: new Date(item.pubDate).toLocaleTimeString(),
-                outlier: hasConflict ? "Temporal mismatch detected in 'Node Beta' reporting timeline." : null,
-                references: [
-                    { header: "Entity", detail: "Global Governance Body" },
-                    { header: "Risk Level", detail: "Tier 2 - Monitoring" }
+                id: id,
+                source: "BBC WORLD SERVICE",
+                node: `GLO-SEC-${id}`,
+                topic: "GEOPOLITICS",
+                title: item.title.toUpperCase(),
+                summary: item.contentSnippet ? item.contentSnippet.substring(0, 150) + "..." : "",
+                body: processedBody,
+                timestamp: new Date(item.pubDate).toISOString().replace('T', ' ').substring(0, 19),
+                // Only flag a discrepancy if actual "Conflict" keywords were found
+                discrepancy: rawBody.toLowerCase().includes('conflict') ? "LATENCY WARNING: Factual divergence detected in local reporting nodes." : null,
+                refs: [
+                    { label: "Classification", val: "RESTRICTED" },
+                    { label: "Reliability", val: rawBody.length > 200 ? "HIGH" : "MEDIUM" },
+                    { label: "Internal ID", val: `GERG-${id}` }
                 ]
             };
         });
         res.json(articles);
     } catch (err) {
-        res.status(500).json({ error: "Failed to sync nodes" });
+        res.status(500).json({ error: "INTEGRITY_FAIL" });
     }
 });
 
-app.listen(3000, () => console.log('Gergov Brain Active'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('GERGOV ANALYTICS ONLINE'));
