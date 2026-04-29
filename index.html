@@ -68,12 +68,6 @@
         }
         .outlier b { color: #d93025; text-transform: uppercase; font-size: 11px; display: block; margin-bottom: 2px; }
 
-        /* Sidebar Elements */
-        .nav-list { list-style: none; padding: 0; margin: 0; }
-        .nav-list li { margin-bottom: 8px; }
-        .nav-list a { color: #1c1e21; text-decoration: none; font-weight: 600; }
-        .nav-list a:hover { color: #1a0dab; }
-
         .sidebar-card { background: #fff; border: 1px solid #dddfe2; padding: 12px; margin-bottom: 20px; border-radius: 2px; }
 
         footer { 
@@ -85,6 +79,9 @@
             color: #90949c;
             text-align: center;
         }
+
+        /* Loading animation style */
+        .loading { font-style: italic; color: #90949c; padding: 20px; text-align: center; }
 
         @media (max-width: 900px) {
             .container { grid-template-columns: 1fr; }
@@ -99,8 +96,8 @@
             <h1>GERGOV.EU</h1>
             <span>Global Event Reporting & Governmental Outlier Verifier</span>
         </div>
-        <div style="font-size: 11px; color: #90949c; font-weight: bold;">
-            SYSTEM STATUS: ONLINE // DATA_NODES: 14
+        <div id="system-status" style="font-size: 11px; color: #90949c; font-weight: bold;">
+            SYSTEM STATUS: CONNECTING...
         </div>
     </header>
 
@@ -108,43 +105,16 @@
         
         <aside class="column">
             <div class="col-title">Navigation</div>
-            <ul class="nav-list">
-                <li><a href="#">Collective Feed</a></li>
-                <li><a href="#">Discrepancy Archive</a></li>
-                <li><a href="#">Economics</a></li>
-                <li><a href="#">Legislative Tracker</a></li>
-            </ul>
-            <br>
-            <div class="col-title">Monitoring</div>
-            <div class="sidebar-card" style="font-size: 11px; line-height: 1.8;">
-                • REUTERS<br>• AP NEWS<br>• TASS<br>• AL JAZEERA<br>• BBC WORLD<br>• EURONEWS
+            <div class="sidebar-card">
+                <p><b>Collective Feed</b></p>
+                <p>Discrepancy Archive</p>
+                <p>Economics</p>
             </div>
         </aside>
 
-        <main class="column">
+        <main class="column" id="news-feed">
             <div class="col-title">Latest Collective Intelligence</div>
-
-            <div class="article">
-                <div class="meta"><span class="topic">Policy</span> | <span class="source">Reuters</span></div>
-                <a href="#">New Trade Regulations Framework Proposed</a>
-                <p>European commission outlines new standards for tech imports and hardware security audits starting Q4 2026.</p>
-            </div>
-
-            <div class="article">
-                <div class="meta"><span class="topic">Conflict</span> | <span class="source">Source Alpha</span></div>
-                <a href="#">Diplomatic Peace Talks Stalled in Geneva</a>
-                <p>Spokesperson claims negotiations have halted due to lack of consensus on border demarcation points.</p>
-                <div class="outlier">
-                    <b>● Discrepancy Detected</b>
-                    Source Beta reports that talks are "ongoing but private." Gergov logic flags temporal mismatch in reporting times.
-                </div>
-            </div>
-
-            <div class="article">
-                <div class="meta"><span class="topic">Economy</span> | <span class="source">EuroNews</span></div>
-                <a href="#">Inflation Stabilizes Across Eurozone</a>
-                <p>Consumer price indices show a cooling trend in energy costs for the third consecutive month.</p>
-            </div>
+            <div class="loading">Initialising Data Nodes and verifying consensus...</div>
         </main>
 
         <aside class="column">
@@ -152,23 +122,71 @@
             <div class="sidebar-card">
                 <p style="margin-top: 0;"><b>Verification Logic:</b> Active</p>
                 <div style="font-size: 12px; background: #f0f2f5; padding: 10px; border-radius: 4px;">
-                    <b style="color: #d93025;">Current Flags:</b>
-                    <ul style="padding-left: 15px; margin: 8px 0;">
-                        <li>Reported casualty variance (Topic: Region A)</li>
-                        <li>Tariff percentage mismatch (Topic: Tech Trade)</li>
+                    <b style="color: #d93025;">Node Status:</b>
+                    <ul id="node-list" style="padding-left: 15px; margin: 8px 0;">
+                        <li>Syncing...</li>
                     </ul>
                 </div>
-            </div>
-            <div class="sidebar-card" style="font-size: 12px;">
-                Gergov processes raw data strings to identify factual divergence between news nodes.
             </div>
         </aside>
 
     </div>
 
     <footer>
-        &copy; 2026 GERGOV.EU // INDEPENDENT NEWS COLLECTIVE. DATA IS PROPERTY OF RESPECTIVE SOURCES.
+        &copy; 2026 GERGOV.EU // INDEPENDENT NEWS COLLECTIVE.
     </footer>
 
+    <script>
+        async function fetchGergovData() {
+            const feedContainer = document.getElementById('news-feed');
+            const statusLabel = document.getElementById('system-status');
+            
+            try {
+                // REPLACE THE URL BELOW with your Render Web Service URL
+                const response = await fetch('https://gergov-brain.onrender.com');
+                const data = await response.json();
+
+                // Update Status
+                statusLabel.innerText = `SYSTEM STATUS: ONLINE // DATA_NODES: ${data.length}`;
+                
+                // Clear loading message
+                feedContainer.innerHTML = '<div class="col-title">Latest Collective Intelligence</div>';
+
+                // Loop through news items
+                data.forEach(item => {
+                    const articleHtml = `
+                        <div class="article">
+                            <div class="meta">
+                                <span class="topic">${item.topic}</span> | 
+                                <span class="source">${item.source}</span>
+                            </div>
+                            <a href="#">${item.title}</a>
+                            <p>${item.content}</p>
+                            ${item.outlier ? `
+                                <div class="outlier">
+                                    <b>● Discrepancy Detected</b>
+                                    ${item.outlier}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    feedContainer.innerHTML += articleHtml;
+                });
+
+            } catch (error) {
+                console.error("Link to brain failed:", error);
+                statusLabel.innerText = "SYSTEM STATUS: OFFLINE";
+                feedContainer.innerHTML = `
+                    <div class="article" style="border: 1px solid #d93025;">
+                        <b style="color: #d93025;">CONNECTION ERROR</b>
+                        <p>Could not reach the Gergov Brain. Ensure your Backend Web Service is running on Render.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Run the function when the page loads
+        fetchGergovData();
+    </script>
 </body>
 </html>
