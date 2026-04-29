@@ -100,7 +100,7 @@
 
     async function updateIntel() {
         try {
-            const res = await fetch('https://pnc.onrender.com/api/news');
+            const res = await fetch('https://gergov-brain.onrender.com/api/news');
             currentData = await res.json();
             document.getElementById('status').innerText = `SYNC_COMPLETE // NODES: ${currentData.length}`;
             renderCards();
