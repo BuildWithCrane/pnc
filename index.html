@@ -27,7 +27,7 @@
             width: 240px; border-right: 1px solid var(--border); 
             padding: 20px; display: flex; flex-direction: column;
         }
-        .logo { font-weight: 900; font-size: 18px; letter-spacing: -1px; margin-bottom: 40px; }
+        .logo { font-weight: 900; font-size: 18px; letter-spacing: -1px; margin-bottom: 40px; cursor: pointer; }
         .nav-item { 
             padding: 10px 0; font-size: 12px; font-weight: 700; color: var(--text-dim); 
             text-transform: uppercase; cursor: pointer; border-bottom: 1px solid transparent;
@@ -49,15 +49,14 @@
             transition: background 0.2s;
         }
         .article-card:hover { background: var(--surface); }
-        .meta-line { font-size: 10px; font-weight: 800; color: var(--text-dim); margin-bottom: 8px; }
+        .meta-line { font-size: 10px; font-weight: 800; color: var(--text-dim); margin-bottom: 8px; font-family: monospace; }
         .card-title { font-size: 20px; font-weight: 700; margin: 0 0 10px 0; line-height: 1.2; }
-        .card-preview { font-size: 14px; color: var(--text-dim); max-width: 800px; }
         .flag-tag { 
             display: inline-block; background: var(--warning); color: #000; 
             font-size: 9px; padding: 2px 6px; font-weight: 900; margin-top: 10px;
         }
 
-        /* Full Screen Dossier (The "Slate") */
+        /* The Slate (Full Screen Dossier) */
         #slate {
             position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
             background: #fff; z-index: 1000; transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -71,25 +70,30 @@
         .close-slate { 
             position: absolute; top: 30px; left: 30px; font-size: 12px; font-weight: 900; 
             cursor: pointer; text-transform: uppercase; border: 1px solid #000; padding: 5px 10px;
-            background: white;
+            background: #fff;
         }
 
         .dossier-id { font-family: monospace; font-size: 11px; color: var(--text-dim); margin-bottom: 20px; }
-        .dossier-title { font-size: 42px; font-weight: 900; line-height: 1; margin: 0 0 40px 0; text-transform: uppercase; }
-        .dossier-content { font-size: 18px; line-height: 1.6; color: #333; max-width: 700px; white-space: pre-wrap; }
+        .dossier-title { font-size: 42px; font-weight: 900; line-height: 1; margin: 0 0 40px 0; }
+        .dossier-content { font-size: 18px; line-height: 1.6; color: #333; max-width: 740px; white-space: pre-wrap; }
+
+        /* Evidence Block */
+        #d-evidence-block {
+            margin-top: 60px; background: var(--warning); border: 2px solid #000; padding: 30px;
+        }
+        .evidence-label { font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; }
 
         .ref-row { margin-bottom: 25px; }
         .ref-label { font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
         .ref-val { font-size: 14px; font-weight: 600; margin-top: 4px; }
-
-        /* About Page Specific */
-        .acronym { font-weight: 900; border-bottom: 2px solid var(--accent); }
+        
+        .acronym { font-weight: 900; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">GERGOV.INTEL</div>
+        <div class="logo" onclick="location.reload()">GERGOV.INTEL</div>
         <div class="nav-item" onclick="closeSlate()">Collective Feed</div>
         <div class="nav-item" onclick="openAbout()">About</div>
         <div class="nav-item">Archive</div>
@@ -107,13 +111,16 @@
     </main>
 
     <div id="slate">
-        <div class="close-slate" onclick="closeSlate()">← Return to Feed</div>
+        <button class="close-slate" onclick="closeSlate()">← Return to Feed</button>
         <div class="slate-body">
             <div id="d-id" class="dossier-id"></div>
             <h1 id="d-title" class="dossier-title"></h1>
             <div id="d-body" class="dossier-content"></div>
             
-            <div id="d-discrepancy" style="margin-top: 60px;"></div>
+            <div id="d-evidence-block" style="display:none;">
+                <div class="evidence-label">[!] Outlier Verification Log</div>
+                <div id="d-evidence-text" style="font-size: 15px; font-weight: 700;"></div>
+            </div>
         </div>
         <aside class="slate-sidebar">
             <h3 style="font-size: 12px; text-transform: uppercase; margin-bottom: 30px;">Reference Library</h3>
@@ -126,7 +133,6 @@
 
         async function loadFeed() {
             try {
-                // Change this to your Render/Backend URL
                 const response = await fetch('https://gergov-brain.onrender.com/api/news');
                 articles = await response.json();
                 
@@ -136,7 +142,6 @@
                     <div class="article-card" onclick="openSlate('${a.id}')">
                         <div class="meta-line">${a.source} // ${a.timestamp}</div>
                         <h3 class="card-title">${a.title}</h3>
-                        <div class="card-preview">${a.body.substring(0, 150)}...</div>
                         ${a.discrepancy ? `<div class="flag-tag">DISCREPANCY DETECTED</div>` : ''}
                     </div>
                 `).join('');
@@ -147,15 +152,23 @@
 
         function openSlate(id) {
             const a = articles.find(x => x.id === id);
+            if(!a) return;
+
+            // FIX: Scroll reset
+            const slateBody = document.querySelector('.slate-body');
+            if(slateBody) slateBody.scrollTop = 0;
+
             document.getElementById('d-id').innerText = `GERGOV_DOSSIER: ${a.node}`;
             document.getElementById('d-title').innerText = a.title;
             document.getElementById('d-body').innerText = a.body;
             
-            const discArea = document.getElementById('d-discrepancy');
-            discArea.innerHTML = a.discrepancy ? `
-                <div style="background: var(--warning); padding: 20px; font-size: 13px; font-weight: 700;">
-                    WARNING: ${a.discrepancy}
-                </div>` : '';
+            const evidenceBlock = document.getElementById('d-evidence-block');
+            if (a.discrepancy) {
+                evidenceBlock.style.display = 'block';
+                document.getElementById('d-evidence-text').innerText = a.discrepancy;
+            } else {
+                evidenceBlock.style.display = 'none';
+            }
 
             document.getElementById('d-refs').innerHTML = a.refs.map(r => `
                 <div class="ref-row">
@@ -168,16 +181,19 @@
         }
 
         function openAbout() {
-            document.getElementById('d-id').innerText = "SYSTEM_PROTOCOL: VERSION_INFO";
-            document.getElementById('d-title').innerText = "WHAT IS GERGOV?";
+            const slateBody = document.querySelector('.slate-body');
+            if(slateBody) slateBody.scrollTop = 0;
+
+            document.getElementById('d-id').innerText = "SYSTEM_PROTOCOL: DEFINITION";
+            document.getElementById('d-title').innerText = "GERGOV";
             document.getElementById('d-body').innerHTML = `
                 <p><span class="acronym">G</span>LOBAL <span class="acronym">E</span>VENT <span class="acronym">R</span>EPORTING <span class="acronym">G</span>RID: <span class="acronym">O</span>UTLIER <span class="acronym">V</span>ERIFICATION</p>
-                <p style="margin-top: 40px; font-style: italic;">"Gergov serves as the digital herald, consolidating state-level communications into a single, auditable stream for public oversight."</p>
+                <p style="margin-top: 40px; font-style: italic; color: var(--text-dim);">"Gergov serves as the digital herald, consolidating state-level communications into a single, auditable stream for public oversight."</p>
             `;
-            document.getElementById('d-discrepancy').innerHTML = '';
+            document.getElementById('d-evidence-block').style.display = 'none';
             document.getElementById('d-refs').innerHTML = `
-                <div class="ref-row"><div class="ref-label">STATUS</div><div class="ref-val">ACTIVE</div></div>
-                <div class="ref-row"><div class="ref-label">ENCRYPTION</div><div class="ref-val">RSA-4096</div></div>
+                <div class="ref-row"><div class="ref-label">VERSION</div><div class="ref-val">2.0.4</div></div>
+                <div class="ref-row"><div class="ref-label">CLEARANCE</div><div class="ref-val">PUBLIC_DOMAIN</div></div>
             `;
             document.getElementById('slate').classList.add('active');
         }
