@@ -6,11 +6,11 @@ const parser = new Parser();
 
 app.use(cors());
 
-// Definition of what we are looking for and WHY
+// The Intelligence Ruleset
 const intelRules = [
-    { regex: /conflict|military|strike|attack/gi, type: 'red', label: 'Security Alert', desc: 'Direct kinetic or security-related event detected.' },
-    { regex: /unconfirmed|sources claim|reported/gi, type: 'orange', label: 'Verification Pending', desc: 'Information is unverified by secondary nodes.' },
-    { regex: /\d{1,2}:\d{2}/g, type: 'orange', label: 'Temporal Marker', desc: 'Time-sensitive data requires cross-referencing for latency.' }
+    { regex: /conflict|military|strike|attack|war|fighting/gi, type: 'red', label: 'Security Alert', desc: 'Kinetic or security-related event detected in string.' },
+    { regex: /unconfirmed|sources claim|reported|alleged/gi, type: 'orange', label: 'Verification Pending', desc: 'Primary node data is unverified by secondary sources.' },
+    { regex: /\d{1,2}:\d{2}/g, type: 'orange', label: 'Temporal Marker', desc: 'Time-sensitive data identified; cross-referencing for latency.' }
 ];
 
 app.get('/api/news', async (req, res) => {
@@ -21,7 +21,6 @@ app.get('/api/news', async (req, res) => {
             let bodyText = item.contentSnippet || "";
             let findings = [];
 
-            // Apply highlighting and collect explanations
             intelRules.forEach(rule => {
                 if (rule.regex.test(bodyText)) {
                     findings.push(`${rule.label}: ${rule.desc}`);
@@ -31,16 +30,22 @@ app.get('/api/news', async (req, res) => {
                 }
             });
 
+            const id = Math.random().toString(36).substr(2, 6).toUpperCase();
+
             return {
-                id: Math.random().toString(36).substr(2, 6).toUpperCase(),
-                source: "BBC WORLD",
-                title: item.title,
+                id: id,
+                node: `GLO-SEC-${id}`,
+                source: "BBC WORLD SERVICE",
+                topic: "GEOPOLITICS",
+                title: item.title.toUpperCase(),
+                summary: item.contentSnippet ? item.contentSnippet.substring(0, 120) + "..." : "",
                 body: bodyText,
-                timestamp: new Date(item.pubDate).toLocaleString(),
-                findings: findings, // This is the explanation list
+                timestamp: new Date(item.pubDate).toISOString().replace('T', ' ').substring(0, 19),
+                findings: findings,
                 refs: [
                     { label: "Classification", val: "OFFICIAL" },
-                    { label: "Reliability", val: findings.length > 0 ? "SCRUTINY REQUIRED" : "STABLE" }
+                    { label: "Reliability", val: findings.length > 0 ? "SCRUTINY REQ" : "STABLE" },
+                    { label: "System ID", val: `GERG-${id}` }
                 ]
             };
         });
@@ -50,4 +55,5 @@ app.get('/api/news', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('GERGOV ANALYTICS ONLINE'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('GERGOV ENGINE ONLINE'));
