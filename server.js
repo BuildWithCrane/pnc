@@ -1,81 +1,78 @@
 const express = require('express');
 const cors = require('cors');
 const Parser = require('rss-parser');
-const { JSDOM } = require('jsdom');
 const app = express();
 const parser = new Parser();
 
 app.use(cors());
 
-const intelRules = [
-    { regex: /conflict|military|strike|attack|war|fighting|missile|explosion/gi, type: 'red', label: 'Security Alert', desc: 'Kinetic markers identified: ' },
-    { regex: /unconfirmed|sources claim|reported|alleged|tensions/gi, type: 'orange', label: 'Verification Pending', desc: 'Unverified linguistic markers: ' },
-    { regex: /\d{1,2}:\d{2}/g, type: 'orange', label: 'Temporal Marker', desc: 'Time-sensitive data detected: ' }
+// Sources to compare
+const FEEDS = [
+    { name: "BBC", url: "https://feeds.bbci.co.uk/news/world/rss.xml" },
+    { name: "AL_JAZEERA", url: "https://www.aljazeera.com/xml/rss/all.xml" }
 ];
 
 app.get('/api/news', async (req, res) => {
     try {
-        const feed = await parser.parseURL('https://feeds.bbci.co.uk/news/world/rss.xml');
+        // Fetch all feeds simultaneously
+        const feedResults = await Promise.all(FEEDS.map(f => parser.parseURL(f.url).then(res => ({ source: f.name, items: res.items }))));
         
-        const articlePromises = feed.items.slice(0, 8).map(async (item) => {
-            let fullParagraphs = "";
-            try {
-                const dom = await JSDOM.fromURL(item.link);
-                const pTags = dom.window.document.querySelectorAll('article p');
-                fullParagraphs = Array.from(pTags).slice(0, 5).map(p => p.textContent).join('\n\n');
-            } catch (e) {
-                fullParagraphs = item.contentSnippet;
-            }
+        const allArticles = [];
+        const masterList = feedResults[0].items; // Use BBC as the base
+        const comparisonList = feedResults[1].items; // Compare against Al Jazeera
 
-            let bodyText = fullParagraphs;
+        masterList.slice(0, 10).map(item => {
+            const id = Math.random().toString(36).substr(2, 6).toUpperCase();
             let findings = [];
+            let body = item.contentSnippet || "";
 
-            // BACKING IT UP: Find the exact words that triggered the alert
-            intelRules.forEach(rule => {
-                const matches = bodyText.match(rule.regex);
-                if (matches) {
-                    // Create a unique list of the actual words found
-                    const uniqueMatches = [...new Set(matches.map(m => m.toLowerCase()))];
-                    findings.push(`<strong>${rule.label}</strong>: ${rule.desc} [${uniqueMatches.join(', ')}]`);
-                    
-                    bodyText = bodyText.replace(rule.regex, (match) => 
-                        `<span class="high-${rule.type}">${match}</span>`
-                    );
-                }
+            // LOGIC: Find a matching story in the second source
+            // We look for 2+ matching words in the title
+            const itemWords = item.title.toLowerCase().split(' ').filter(w => w.length > 4);
+            const match = comparisonList.find(c => {
+                const matchWords = c.title.toLowerCase().split(' ');
+                return itemWords.filter(w => matchWords.includes(w)).length >= 2;
             });
 
-            // SOURCE COMPARISON: Logic-based Latency Check
-            const pubDate = new Date(item.pubDate);
-            const now = new Date();
-            const diffMinutes = Math.floor((now - pubDate) / 1000 / 60);
-            
-            if (diffMinutes > 60) {
-                findings.push(`<strong>Temporal Latency</strong>: Article age (${diffMinutes}m) exceeds "Breaking" threshold. Content may be desynced from live wires.`);
+            if (match) {
+                // 1. Compare Timestamps
+                const timeA = new Date(item.pubDate);
+                const timeB = new Date(match.pubDate);
+                const timeDiff = Math.abs(Math.floor((timeA - timeB) / 1000 / 60));
+
+                if (timeDiff > 15) {
+                    findings.push(`<strong>TEMPORAL MISMATCH</strong>: ${item.source} reports ${timeA.toLocaleTimeString()}, but AL_JAZEERA reports ${timeB.toLocaleTimeString()}. (${timeDiff}m variance)`);
+                }
+
+                // 2. Compare Content Density
+                if (item.title.length > match.title.length + 20) {
+                    findings.push(`<strong>NARRATIVE DISCREPANCY</strong>: Primary source providing significantly more detail than secondary node. Possible suppression or data lag.`);
+                }
+            } else {
+                findings.push(`<strong>ISOLATED REPORT</strong>: No secondary confirmation found across verification nodes. High risk of informational silo.`);
             }
 
-            const id = Math.random().toString(36).substr(2, 6).toUpperCase();
-
-            return {
+            allArticles.push({
                 id: id,
                 node: `GLO-SEC-${id}`,
-                source: "BBC WORLD SERVICE",
+                source: "BBC WORLD",
                 title: item.title.toUpperCase(),
-                body: bodyText,
-                timestamp: pubDate.toISOString().replace('T', ' ').substring(0, 19),
+                body: body,
+                timestamp: new Date(item.pubDate).toISOString().replace('T', ' ').substring(0, 19),
                 findings: findings,
                 refs: [
                     { label: "Classification", val: "OFFICIAL" },
-                    { label: "Reliability", val: diffMinutes < 30 ? "HIGH (LIVE)" : "STALE" },
-                    { label: "Latency", val: `${diffMinutes} MIN` }
+                    { label: "Verification", val: match ? "DUAL-NODE" : "UNVERIFIED" },
+                    { label: "Peer Source", val: match ? "AL_JAZEERA" : "NONE" }
                 ]
-            };
+            });
         });
 
-        const results = await Promise.all(articlePromises);
-        res.json(results);
+        res.json(allArticles);
     } catch (err) {
-        res.status(500).json({ error: "FEED_SYNC_ERROR" });
+        console.error(err);
+        res.status(500).json({ error: "CROSS_REF_FAIL" });
     }
 });
 
-app.listen(3000, () => console.log('GERGOV ANALYTICS ONLINE'));
+app.listen(3000, () => console.log('GERGOV COMPARATOR ONLINE'));
