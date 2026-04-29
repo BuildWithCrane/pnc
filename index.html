@@ -1,226 +1,174 @@
-export default {
-  async fetch(request, env) {
-    // This is where your Scraper would eventually push real data
-    const newsData = {
-      timestamp: new Date().toUTCString(),
-      node: "EU-CENTRAL-01",
-      active_conflicts: 2,
-      articles: [
-        {
-          id: 101,
-          topic: "ECONOMY",
-          title: "New Trade Tariff Implemented",
-          source: "Source Alpha",
-          details: "Tariff set at 15% for all electronic imports.",
-          outlier: false
-        },
-        {
-          id: 102,
-          topic: "ECONOMY",
-          title: "Electronics Import Adjustment",
-          source: "Source Beta",
-          details: "Internal documents suggest a 22% tariff hike.",
-          outlier: true,
-          conflict_note: "DISCREPANCY: Source Alpha reports 15%. Margin of error > 7%."
-        },
-        {
-          id: 103,
-          topic: "DIPLOMACY",
-          title: "Regional Summit Scheduled",
-          source: "Source Gamma",
-          details: "Date confirmed for May 12th in Brussels.",
-          outlier: false
-        }
-      ]
-    };
-
-    const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GERGOV.EU // GLOBAL EVENT REPORTING</title>
+    <title>GERGOV.EU | Political News Collective</title>
     <style>
-        /* BASE BRUTALIST RESET */
-        * { box-sizing: border-box; }
+        /* Clean, Professional News Layout */
         body { 
-            font-family: "Courier New", Courier, monospace; 
-            background: #d4d0c8; /* Classic OS Grey */
-            color: #000; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: #f0f2f5; 
+            color: #1c1e21; 
             margin: 0; 
-            padding: 8px; 
-            line-height: 1.2;
+            padding: 20px; 
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        /* HEADER SECTION */
-        .system-bar { 
-            background: #000080; 
-            color: #fff; 
-            padding: 2px 8px; 
-            font-size: 11px; 
-            display: flex; 
-            justify-content: space-between;
-        }
         header { 
-            background: #fff; 
-            border: 2px inset #fff; 
-            padding: 10px; 
-            margin-bottom: 8px; 
-            border: 1px solid #777;
+            max-width: 1100px;
+            margin: 0 auto 30px auto;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end;
+            border-bottom: 3px solid #000; 
+            padding-bottom: 15px;
         }
-        h1 { margin: 0; font-size: 1.6em; letter-spacing: -1px; }
-        .acronym { font-size: 10px; color: #555; text-transform: uppercase; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
 
-        /* LAYOUT GRID */
-        .main-grid { 
+        .brand h1 { margin: 0; font-size: 32px; letter-spacing: -1.5px; font-weight: 900; }
+        .brand span { font-size: 11px; color: #606770; text-transform: uppercase; font-weight: bold; }
+
+        .container { 
             display: grid; 
-            grid-template-columns: 180px 1fr 280px; 
-            gap: 8px; 
+            grid-template-columns: 220px 1fr 280px; 
+            gap: 30px; 
+            max-width: 1100px; 
+            margin: 0 auto; 
         }
 
-        /* COLUMN BOXES */
-        .box { 
-            background: #fff; 
-            border: 1px solid #808080; 
-            box-shadow: 1px 1px 0px #fff inset;
-            margin-bottom: 8px;
+        .col-title { 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            font-size: 12px;
+            border-bottom: 1px solid #ccd0d5; 
+            margin-bottom: 15px; 
+            padding-bottom: 5px;
+            color: #4b4f56;
         }
-        .box-header { 
-            background: #808080; 
-            color: #fff; 
-            padding: 2px 6px; 
-            font-size: 12px; 
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .box-content { padding: 6px; font-size: 12px; }
 
-        /* NEWS ELEMENTS */
-        .article { border-bottom: 1px dotted #808080; padding: 6px 0; }
-        .article:last-child { border: none; }
-        .tag { font-weight: bold; color: #0000ee; font-size: 10px; }
-        .topic-label { background: #eee; padding: 0 4px; font-size: 10px; border: 1px solid #ccc; }
+        /* News Cards */
+        .article { background: #fff; border: 1px solid #dddfe2; padding: 15px; margin-bottom: 15px; border-radius: 2px; }
+        .meta { font-size: 11px; font-weight: bold; margin-bottom: 5px; }
+        .topic { color: #d93025; text-transform: uppercase; }
+        .source { color: #606770; }
         
-        /* THE OUTLIER ALERT (THE CORE FEATURE) */
-        .outlier-box { 
-            margin-top: 5px;
-            background: #ffff00; /* Warning Yellow */
-            border: 2px dashed #ff0000; 
-            padding: 4px;
-            color: #000;
-            font-weight: bold;
+        .article a { font-size: 18px; color: #1a0dab; text-decoration: none; font-weight: bold; display: block; margin-bottom: 5px; }
+        .article a:hover { text-decoration: underline; }
+        .article p { margin: 0; color: #4b4f56; font-size: 14px; }
+
+        /* The Outlier/Discrepancy Box */
+        .outlier { 
+            background: #fff9c4; 
+            border: 1px solid #fbc02d; 
+            border-left: 5px solid #fbc02d;
+            padding: 10px; 
+            margin-top: 12px; 
+            font-size: 13px;
         }
-        .blink { animation: blinker 1.5s linear infinite; color: red; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        .outlier b { color: #d93025; text-transform: uppercase; font-size: 11px; display: block; margin-bottom: 2px; }
 
-        /* LINKS */
-        a { color: #0000ee; text-decoration: underline; cursor: pointer; }
-        a:hover { background: #000080; color: #fff; text-decoration: none; }
+        /* Sidebar Elements */
+        .nav-list { list-style: none; padding: 0; margin: 0; }
+        .nav-list li { margin-bottom: 8px; }
+        .nav-list a { color: #1c1e21; text-decoration: none; font-weight: 600; }
+        .nav-list a:hover { color: #1a0dab; }
 
-        /* FOOTER */
-        footer { margin-top: 20px; font-size: 10px; color: #666; border-top: 1px solid #808080; padding-top: 5px; }
+        .sidebar-card { background: #fff; border: 1px solid #dddfe2; padding: 12px; margin-bottom: 20px; border-radius: 2px; }
 
-        @media (max-width: 800px) {
-            .main-grid { grid-template-columns: 1fr; }
+        footer { 
+            max-width: 1100px; 
+            margin: 50px auto 20px auto; 
+            border-top: 1px solid #ccd0d5; 
+            padding-top: 15px; 
+            font-size: 12px; 
+            color: #90949c;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
 
-    <div class="system-bar">
-        <span>STATUS: 0x00 - SYSTEM_OK</span>
-        <span>NODE: ${newsData.node} // ${newsData.timestamp}</span>
-    </div>
-
     <header>
-        <h1>GERGOV.EU</h1>
-        <div class="acronym">
-            <strong>G</strong>lobal <strong>E</strong>vent <strong>R</strong>eporting & 
-            <strong>G</strong>overnmental <strong>O</strong>utlier <strong>V</strong>erifier
+        <div class="brand">
+            <h1>GERGOV.EU</h1>
+            <span>Global Event Reporting & Governmental Outlier Verifier</span>
+        </div>
+        <div style="font-size: 11px; color: #90949c; font-weight: bold;">
+            SYSTEM STATUS: ONLINE // DATA_NODES: 14
         </div>
     </header>
 
-    <div class="main-grid">
+    <div class="container">
         
-        <div class="column">
-            <div class="box">
-                <div class="box-header">Index</div>
-                <div class="box-content">
-                    <a href="#">/GLOBAL_FEED</a><br>
-                    <a href="#">/ECON_MONITOR</a><br>
-                    <a href="#">/DIPLOMATIC_CORE</a><br>
-                    <a href="#">/ARCHIVE</a><br>
-                    <a href="#">/SUBMIT_DATA</a>
-                </div>
+        <aside class="column">
+            <div class="col-title">Navigation</div>
+            <ul class="nav-list">
+                <li><a href="#">Collective Feed</a></li>
+                <li><a href="#">Discrepancy Archive</a></li>
+                <li><a href="#">Economics</a></li>
+                <li><a href="#">Legislative Tracker</a></li>
+            </ul>
+            <br>
+            <div class="col-title">Monitoring</div>
+            <div class="sidebar-card" style="font-size: 11px; line-height: 1.8;">
+                • REUTERS<br>• AP NEWS<br>• TASS<br>• AL JAZEERA<br>• BBC WORLD<br>• EURONEWS
             </div>
-            <div class="box">
-                <div class="box-header">Live Sources</div>
-                <div class="box-content" style="line-height: 1.6;">
-                    • Source Alpha [ONLINE]<br>
-                    • Source Beta [ONLINE]<br>
-                    • Source Gamma [OFFLINE]<br>
-                    • Source Delta [ONLINE]
-                </div>
-            </div>
-        </div>
+        </aside>
 
-        <div class="column">
-            <div class="box">
-                <div class="box-header">Central Data Stream</div>
-                <div class="box-content">
-                    ${newsData.articles.map(article => `
-                        <div class="article">
-                            <span class="topic-label">${article.topic}</span>
-                            <span class="tag">[${article.source}]</span><br>
-                            <a href="#" style="font-size: 14px; font-weight: bold;">${article.title}</a>
-                            <div style="margin-top: 3px;">${article.details}</div>
-                            
-                            ${article.outlier ? `
-                                <div class="outlier-box">
-                                    <span class="blink">!!! OUTLIER DETECTED !!!</span><br>
-                                    ${article.conflict_note}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        </div>
+        <main class="column">
+            <div class="col-title">Latest Collective Intelligence</div>
 
-        <div class="column">
-            <div class="box" style="border-color: #ff0000;">
-                <div class="box-header" style="background: #ff0000;">Conflict Dashboard</div>
-                <div class="box-content">
-                    <div style="font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee;">
-                        Active Conflicts: ${newsData.active_conflicts}
-                    </div>
-                    <div style="font-size: 11px;">
-                        <strong>Log ID #442:</strong> Data mismatch regarding <em>Trade Tariff</em>. Source Alpha/Beta divergence.<br><br>
-                        <strong>Log ID #443:</strong> Temporal discrepancy in <em>Summit Timing</em>. Verification pending...
-                    </div>
+            <div class="article">
+                <div class="meta"><span class="topic">Policy</span> | <span class="source">Reuters</span></div>
+                <a href="#">New Trade Regulations Framework Proposed</a>
+                <p>European commission outlines new standards for tech imports and hardware security audits starting Q4 2026.</p>
+            </div>
+
+            <div class="article">
+                <div class="meta"><span class="topic">Conflict</span> | <span class="source">Source Alpha</span></div>
+                <a href="#">Diplomatic Peace Talks Stalled in Geneva</a>
+                <p>Spokesperson claims negotiations have halted due to lack of consensus on border demarcation points.</p>
+                <div class="outlier">
+                    <b>● Discrepancy Detected</b>
+                    Source Beta reports that talks are "ongoing but private." Gergov logic flags temporal mismatch in reporting times.
                 </div>
             </div>
-            <div class="box">
-                <div class="box-header">System Intel</div>
-                <div class="box-content">
-                    Crawler v.2.4.1 checking 1,402 points per hour. Data parsed from RSS/XML nodes globally.
+
+            <div class="article">
+                <div class="meta"><span class="topic">Economy</span> | <span class="source">EuroNews</span></div>
+                <a href="#">Inflation Stabilizes Across Eurozone</a>
+                <p>Consumer price indices show a cooling trend in energy costs for the third consecutive month.</p>
+            </div>
+        </main>
+
+        <aside class="column">
+            <div class="col-title">Conflict Dashboard</div>
+            <div class="sidebar-card">
+                <p style="margin-top: 0;"><b>Verification Logic:</b> Active</p>
+                <div style="font-size: 12px; background: #f0f2f5; padding: 10px; border-radius: 4px;">
+                    <b style="color: #d93025;">Current Flags:</b>
+                    <ul style="padding-left: 15px; margin: 8px 0;">
+                        <li>Reported casualty variance (Topic: Region A)</li>
+                        <li>Tariff percentage mismatch (Topic: Tech Trade)</li>
+                    </ul>
                 </div>
             </div>
-        </div>
+            <div class="sidebar-card" style="font-size: 12px;">
+                Gergov processes raw data strings to identify factual divergence between news nodes.
+            </div>
+        </aside>
 
     </div>
 
     <footer>
-        &copy; 2026 GERGOV // GLOBAL EVENT REPORTING GRID. OPERATING UNDER EU TRANSPARENCY PROTOCOLS.
+        &copy; 2026 GERGOV.EU // INDEPENDENT NEWS COLLECTIVE. DATA IS PROPERTY OF RESPECTIVE SOURCES.
     </footer>
 
 </body>
 </html>
-    `;
-
-    return new Response(html, {
-      headers: { "content-type": "text/html;charset=UTF-8" },
-    });
-  },
-};
