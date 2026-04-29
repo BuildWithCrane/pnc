@@ -139,7 +139,7 @@
 
             try {
                 // REPLACE THIS with your Render URL (e.g., https://your-app.onrender.com/api/news)
-                const response = await fetch('http://localhost:3000/api/news');
+                const response = await fetch('https://gergov-brain.onrender.com/api/news');
                 articlesCache = await response.json();
 
                 status.innerText = `NODE_SYNC: ONLINE // SOURCES: ${articlesCache.length}`;
