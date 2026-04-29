@@ -1,31 +1,40 @@
 const express = require('express');
 const cors = require('cors');
+const Parser = require('rss-parser'); // Run: npm install rss-parser
 const app = express();
+const parser = new Parser();
 
-app.use(cors()); // This allows your website to talk to this server
+app.use(cors());
 
-// This is a "Mock" list of news. 
-// Later, we will replace this with the scraper code.
-app.get('/api/news', (req, res) => {
-    const data = [
-        {
-            source: "Reuters",
-            topic: "Conflict",
-            title: "Peace Talks Scheduled",
-            content: "Talks set to begin at 5:00 AM.",
-            time: "5:00 AM"
-        },
-        {
-            source: "Source Beta",
-            topic: "Conflict",
-            title: "Peace Talks Update",
-            content: "Negotiators arriving for 6:00 AM start.",
-            time: "6:00 AM",
-            outlier: "Flag: Temporal mismatch detected (Source Alpha says 5:00 AM)"
-        }
-    ];
-    res.json(data);
+app.get('/api/news', async (req, res) => {
+    try {
+        // Pulling real live news from a stable RSS feed
+        const feed = await parser.parseURL('https://feeds.bbci.co.uk/news/world/rss.xml');
+        
+        const articles = feed.items.map(item => {
+            // Simulated Discrepancy Logic (for the demo)
+            // In a real version, you'd compare this against a 2nd feed
+            const hasConflict = item.title.includes("US") || item.title.includes("EU");
+
+            return {
+                id: Math.random().toString(36).substr(2, 9),
+                source: "BBC World",
+                topic: "Global",
+                title: item.title,
+                content: item.contentSnippet,
+                fullText: item.content || item.contentSnippet + " [Full report available via encrypted node...]",
+                time: new Date(item.pubDate).toLocaleTimeString(),
+                outlier: hasConflict ? "Temporal mismatch detected in 'Node Beta' reporting timeline." : null,
+                references: [
+                    { header: "Entity", detail: "Global Governance Body" },
+                    { header: "Risk Level", detail: "Tier 2 - Monitoring" }
+                ]
+            };
+        });
+        res.json(articles);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to sync nodes" });
+    }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Gergov Brain active on port ${PORT}`));
+app.listen(3000, () => console.log('Gergov Brain Active'));
