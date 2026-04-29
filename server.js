@@ -21,41 +21,47 @@ app.get('/api/news', async (req, res) => {
         const results = await Promise.all(primaryItems.map(async (item) => {
             let fullText = "";
             try {
-                // Heavier scraping to ensure 3+ paragraphs
+                // Bruteforce selection of common news paragraph containers
                 const dom = await JSDOM.fromURL(item.link);
-                const pTags = dom.window.document.querySelectorAll('article p, .ssrcss-1q0mxy8-RichTextContainer p, .main-article-body p');
+                const pTags = dom.window.document.querySelectorAll('article p, .ssrcss-1q0mxy8-RichTextContainer p, .main-article-body p, [data-component="text-block"] p');
                 fullText = Array.from(pTags).map(p => p.textContent).join('\n\n');
             } catch (e) {
-                fullText = item.contentSnippet + "\n\n[CONTENT_FETCH_FAIL: Node connection timed out.]";
+                fullText = item.contentSnippet + "\n\n[EXTERNAL_NODE_FETCH_ERROR]";
             }
 
             const id = Math.random().toString(36).substr(2, 6).toUpperCase();
-            let findings = [];
+            let discrepancy = null;
 
-            // Mismatch Logic
+            // Cross-Source Mismatch Logic
             const match = compareItems.find(c => item.title.split(' ').slice(0,3).some(w => c.title.includes(w)));
             if (match) {
                 const timeA = new Date(item.pubDate);
                 const timeB = new Date(match.pubDate);
                 const diff = Math.abs(Math.floor((timeA - timeB) / 60000));
                 if (diff > 5) {
-                    findings.push(`<strong>TEMPORAL MISMATCH</strong>: BBC reported at ${timeA.toLocaleTimeString()}, Al Jazeera reported at ${timeB.toLocaleTimeString()}. Variance: ${diff}m.`);
+                    discrepancy = `TEMPORAL VARIANCE: Primary node (BBC) reports ${timeA.toLocaleTimeString()} vs Secondary node (ALJ) ${timeB.toLocaleTimeString()}. ${diff}m mismatch.`;
                 }
             }
 
             return {
                 id,
-                title: item.title.toUpperCase(),
+                node: `GLO-SEC-${id}`,
+                source: "BBC WORLD SERVICE",
+                title: item.title,
                 body: fullText,
-                findings: findings,
-                timestamp: item.pubDate,
-                node: `NODE-${id}`
+                timestamp: new Date(item.pubDate).toLocaleString(),
+                discrepancy: discrepancy,
+                refs: [
+                    { label: "VERIFICATION", val: match ? "DUAL-NODE" : "SINGLE-NODE" },
+                    { label: "LATENCY", val: "STABLE" },
+                    { label: "GEO_ORIGIN", val: "LONDON_NODE" }
+                ]
             };
         }));
         res.json(results);
     } catch (err) {
-        res.status(500).send("TERMINAL_OFFLINE");
+        res.status(500).json({ error: "FEED_OFFLINE" });
     }
 });
 
-app.listen(3000, () => console.log('GERGOV_ENGINE_REBOOTED'));
+app.listen(3000);
