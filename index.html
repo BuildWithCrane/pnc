@@ -9,68 +9,224 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #ffffff; --surface: #f8f9fa; --border: #e2e4e7;
-            --text-main: #1a1c1e; --text-dim: #5f6368; --accent: #000000; --warning: #fbc02d;
+            --bg: #ffffff;
+            --surface: #f8f9fa;
+            --border: #e2e4e7;
+            --text-main: #1a1c1e;
+            --text-dim: #5f6368;
+            --accent: #000000;
+            --warning: #fbc02d;
         }
+
         * { box-sizing: border-box; }
-        body { font-family: "Inter", sans-serif; background: var(--bg); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* Nav */
-        nav { width: 240px; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
-        .logo { font-weight: 900; font-size: 18px; letter-spacing: -1px; margin-bottom: 40px; cursor: pointer; }
-        .nav-item { padding: 10px 0; font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; cursor: pointer; border: none; border-bottom: 1px solid transparent; background: none; text-align: left; width: 100%; transition: color 0.2s, border-color 0.2s; }
-        .nav-item:hover, .nav-item:focus { color: var(--accent); border-bottom-color: var(--accent); outline: none; }
+        body {
+            font-family: "Inter", sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── Nav ── */
+        nav {
+            width: 240px;
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .logo {
+            font-weight: 900;
+            font-size: 18px;
+            letter-spacing: -1px;
+            margin-bottom: 40px;
+            cursor: pointer;
+        }
+        .nav-item {
+            padding: 10px 0;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            border-bottom: 1px solid transparent;
+            background: none;
+            text-align: left;
+            width: 100%;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .nav-item:hover,
+        .nav-item:focus { color: var(--accent); border-bottom-color: var(--accent); outline: none; }
         .nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .nav-item:disabled { opacity: 0.4; cursor: default; }
 
-        /* Feed */
+        /* ── Feed ── */
         main { flex: 1; overflow-y: auto; padding: 40px; }
-        .grid-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 30px; }
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
         .grid-header h2 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
         #status { font-size: 10px; font-weight: 800; font-family: "JetBrains Mono", monospace; }
 
-        /* Skeleton loader */
+        /* ── Skeleton ── */
         .skeleton-card { border-bottom: 1px solid var(--border); padding: 20px 0; }
-        .skeleton-line { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 3px; margin-bottom: 8px; }
-        .skeleton-line.meta { height: 10px; width: 30%; }
+        .skeleton-line {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .skeleton-line.meta   { height: 10px; width: 30%; }
         .skeleton-line.title-1 { height: 20px; width: 80%; }
         .skeleton-line.title-2 { height: 20px; width: 55%; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
 
-        /* Article cards */
-        .article-card { border-bottom: 1px solid var(--border); padding: 20px 0; cursor: pointer; transition: background 0.2s; background: none; border-left: none; border-right: none; border-top: none; text-align: left; width: 100%; }
+        /* ── Article cards ── */
+        .article-card {
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: none;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            text-align: left;
+            width: 100%;
+        }
         .article-card:hover, .article-card:focus { background: var(--surface); }
         .article-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-        .meta-line { font-size: 10px; font-weight: 800; color: var(--text-dim); margin-bottom: 8px; font-family: "JetBrains Mono", monospace; }
+        .meta-line {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            font-family: "JetBrains Mono", monospace;
+        }
         .card-title { font-size: 20px; font-weight: 700; margin: 0 0 10px 0; line-height: 1.2; color: var(--text-main); }
-        .flag-tag { display: inline-block; background: var(--warning); color: #000; font-size: 9px; padding: 2px 6px; font-weight: 900; margin-top: 10px; font-family: "JetBrains Mono", monospace; }
+        .flag-tag {
+            display: inline-block;
+            background: var(--warning);
+            color: #000;
+            font-size: 9px;
+            padding: 2px 6px;
+            font-weight: 900;
+            margin-top: 10px;
+            font-family: "JetBrains Mono", monospace;
+        }
 
-        /* Slate panel */
-        #slate { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: #fff; z-index: 1000; transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: grid; grid-template-columns: 1fr 350px; }
+        /* ── Empty / error state ── */
+        .feed-empty {
+            padding: 60px 0;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+        .feed-empty p { margin: 0 0 16px; }
+        .retry-btn {
+            font-family: "Inter", sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            border: 1px solid var(--accent);
+            padding: 6px 14px;
+            background: #fff;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .retry-btn:hover { background: var(--accent); color: #fff; }
+
+        /* ── Slate panel ── */
+        #slate {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: grid;
+            grid-template-columns: 1fr 350px;
+        }
         #slate.active { right: 0; }
         .slate-body { padding: 80px 60px; overflow-y: auto; border-right: 1px solid var(--border); }
         .slate-sidebar { background: var(--surface); padding: 80px 40px; overflow-y: auto; }
-        .close-slate { position: absolute; top: 30px; left: 30px; font-size: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; border: 1px solid #000; padding: 5px 10px; background: #fff; font-family: inherit; }
+        .close-slate {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            border: 1px solid #000;
+            padding: 5px 10px;
+            background: #fff;
+            font-family: inherit;
+            transition: background 0.2s, color 0.2s;
+        }
         .close-slate:hover, .close-slate:focus { background: #000; color: #fff; outline: none; }
         .close-slate:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         .dossier-id { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-dim); margin-bottom: 20px; }
         .dossier-title { font-size: 42px; font-weight: 900; line-height: 1; margin: 0 0 40px 0; }
-        .dossier-content { font-size: 18px; line-height: 1.6; color: #333; max-width: 740px; white-space: pre-wrap; }
+        .dossier-content { font-size: 18px; line-height: 1.7; color: #333; max-width: 740px; }
 
-        /* Highlights */
-        .high-red { border-bottom: 2px solid var(--warning); font-weight: 700; color: var(--accent); }
+        /* ── Highlights ── */
+        .high-red    { border-bottom: 2px solid var(--warning); font-weight: 700; color: var(--accent); }
         .high-orange { border-bottom: 2px dashed var(--warning); font-weight: 600; }
 
-        /* Evidence block */
+        /* ── Evidence block ── */
         #d-evidence-block { margin-top: 60px; background: var(--warning); border: 2px solid #000; padding: 30px; }
         .evidence-label { font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; font-family: "JetBrains Mono", monospace; }
 
-        /* Refs */
+        /* ── Refs ── */
         .ref-row { margin-bottom: 25px; }
         .ref-label { font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; font-family: "JetBrains Mono", monospace; }
         .ref-val { font-size: 14px; font-weight: 600; margin-top: 4px; }
 
-        /* About */
+        /* ── About ── */
         .acronym { font-weight: 900; text-decoration: underline; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; overflow: auto; }
+            nav {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .logo { margin-bottom: 0; margin-right: 20px; }
+            main { padding: 20px; }
+            #slate { grid-template-columns: 1fr; }
+            .slate-sidebar { display: none; } /* collapse sidebar on mobile */
+            .slate-body { padding: 60px 24px 40px; }
+            .dossier-title { font-size: 26px; }
+            .dossier-content { font-size: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .card-title { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -78,7 +234,7 @@
         <div class="logo" onclick="location.reload()" role="button" tabindex="0" aria-label="GERGOV — reload feed">GERGOV.EU</div>
         <button class="nav-item" onclick="closeSlate()">Collective Feed</button>
         <button class="nav-item" onclick="openAbout()">About</button>
-        <button class="nav-item" disabled style="opacity:0.4;cursor:default;">Archive</button>
+        <button class="nav-item" disabled>Archive</button>
     </nav>
 
     <main aria-label="News feed">
@@ -97,26 +253,48 @@
             <div id="d-body" class="dossier-content"></div>
             <div id="d-evidence-block" style="display:none;" aria-label="Discrepancy log">
                 <div class="evidence-label">[!] Outlier Verification Log</div>
-                <div id="d-evidence-text" style="font-size: 15px; font-weight: 700;"></div>
+                <div id="d-evidence-text" style="font-size:15px;font-weight:700;"></div>
             </div>
         </div>
         <aside class="slate-sidebar" aria-label="Reference library">
-            <h3 style="font-size: 12px; text-transform: uppercase; margin-bottom: 30px;">Reference Library</h3>
+            <h3 style="font-size:12px;text-transform:uppercase;margin-bottom:30px;">Reference Library</h3>
             <div id="d-refs"></div>
         </aside>
     </div>
 
     <script>
+        // ── Config ──
+        const API_URL = 'https://gergov-brain.onrender.com/api/news';
+        const MAX_RETRIES = 3;
+        const RETRY_DELAYS = [2000, 5000, 10000]; // ms between retries
+
         let articles = [];
 
-        // DOMPurify-lite: strip tags and return safe text node
+        // ── Sanitise user/server content before DOM injection ──
         function sanitiseText(str) {
             const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML; // entity-encoded, no tags
+            div.textContent = String(str ?? '');
+            return div.innerHTML;
         }
 
-        // Apply highlight spans to already-sanitised HTML string
+        // ── Normalise body: collapse excess blank lines, trim ──
+        function normaliseBody(text) {
+            return (text || '')
+                .replace(/\r\n/g, '\n')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        }
+
+        // ── Convert normalised plain text to paragraphs ──
+        function textToParagraphs(text) {
+            return normaliseBody(text)
+                .split('\n\n')
+                .filter(Boolean)
+                .map(para => `<p>${sanitiseText(para)}</p>`)
+                .join('');
+        }
+
+        // ── Apply keyword highlights to already-safe HTML ──
         function applyHighlights(safeHtml) {
             const kMarkers = /\b(missile|strike|attack|explosion|military|conflict)\w*/gi;
             const uMarkers = /\b(unconfirmed|reportedly|alleged|sources claim)\w*/gi;
@@ -125,6 +303,7 @@
                 .replace(uMarkers, '<span class="high-orange">$&</span>');
         }
 
+        // ── Skeleton loader ──
         function renderSkeleton(count = 6) {
             return Array.from({ length: count }, () => `
                 <div class="skeleton-card" aria-hidden="true">
@@ -134,45 +313,79 @@
                 </div>`).join('');
         }
 
+        // ── Article card ──
         function renderCard(a) {
             const escapedTitle = sanitiseText(a.title);
             return `
-                <button class="article-card" onclick="openSlate('${a.id}')" aria-label="Open article: ${escapedTitle}">
+                <button class="article-card" onclick="openSlate('${a.id}')" aria-label="Open: ${escapedTitle}">
                     <div class="meta-line">${sanitiseText(a.source)} // ${sanitiseText(a.timestamp)}</div>
                     <div class="card-title">${escapedTitle}</div>
                     ${a.discrepancy ? `<div class="flag-tag" aria-label="Discrepancy detected">DISCREPANCY DETECTED</div>` : ''}
                 </button>`;
         }
 
-        async function loadFeed() {
+        // ── Error/empty state with retry button ──
+        function renderError(msg, allowRetry = true) {
+            return `
+                <div class="feed-empty">
+                    <p>${sanitiseText(msg)}</p>
+                    ${allowRetry ? `<button class="retry-btn" onclick="loadFeed()">Retry</button>` : ''}
+                </div>`;
+        }
+
+        // ── Load feed with exponential backoff retry ──
+        async function loadFeed(attempt = 0) {
             const container = document.getElementById('feed-container');
-            container.innerHTML = renderSkeleton();
+            const statusEl  = document.getElementById('status');
+
+            if (attempt === 0) {
+                container.innerHTML = renderSkeleton();
+                statusEl.textContent = 'SYNCING...';
+            } else {
+                statusEl.textContent = `RETRY ${attempt}/${MAX_RETRIES}...`;
+            }
 
             try {
-                const response = await fetch('https://gergov-brain.onrender.com/api/news');
+                const response = await fetch(API_URL);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                articles = await response.json();
 
-                document.getElementById('status').innerText = `NODE ONLINE // ${articles.length} SOURCES`;
+                const data = await response.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    statusEl.textContent = 'NO DATA';
+                    container.innerHTML = renderError('No articles available right now.', false);
+                    return;
+                }
+
+                articles = data;
+                statusEl.textContent = `NODE ONLINE // ${articles.length} SOURCES`;
                 container.innerHTML = articles.map(renderCard).join('');
+
             } catch (err) {
-                document.getElementById('status').innerText = "CONNECTION FAILED";
-                container.innerHTML = `<p style="color:var(--text-dim);font-size:13px;margin-top:20px;">Unable to reach the feed. Try refreshing.</p>`;
+                console.warn(`[FETCH] Attempt ${attempt + 1} failed:`, err.message);
+
+                if (attempt < MAX_RETRIES) {
+                    statusEl.textContent = `RECONNECTING IN ${RETRY_DELAYS[attempt] / 1000}s...`;
+                    setTimeout(() => loadFeed(attempt + 1), RETRY_DELAYS[attempt]);
+                } else {
+                    statusEl.textContent = 'CONNECTION FAILED';
+                    container.innerHTML = renderError('Unable to reach the feed. The server may be starting up — please try again shortly.');
+                }
             }
         }
 
+        // ── Open article slate ──
         function openSlate(id) {
             const a = articles.find(x => x.id === id);
             if (!a) return;
 
             document.querySelector('.slate-body').scrollTop = 0;
-
             document.getElementById('d-id').textContent = `GERGOV_DOSSIER: ${a.node}`;
             document.getElementById('d-title').textContent = a.title;
 
-            // Sanitise then highlight — safe order
-            const safeBody = sanitiseText(a.body);
-            document.getElementById('d-body').innerHTML = applyHighlights(safeBody);
+            // Render body as paragraphs, then apply highlights
+            const paragraphHtml = textToParagraphs(a.body);
+            document.getElementById('d-body').innerHTML = applyHighlights(paragraphHtml);
 
             const ev = document.getElementById('d-evidence-block');
             if (a.discrepancy) {
@@ -182,37 +395,37 @@
                 ev.style.display = 'none';
             }
 
-            document.getElementById('d-refs').innerHTML = a.refs.map(r => `
+            document.getElementById('d-refs').innerHTML = (a.refs || []).map(r => `
                 <div class="ref-row">
                     <div class="ref-label">${sanitiseText(r.label)}</div>
                     <div class="ref-val">${sanitiseText(r.val)}</div>
                 </div>`).join('');
 
-            const slate = document.getElementById('slate');
-            slate.classList.add('active');
-
-            // Move focus into the panel for keyboard users
-            document.querySelector('.close-slate').focus();
-        }
-
-        function openAbout() {
-            document.querySelector('.slate-body').scrollTop = 0;
-            document.getElementById('d-id').textContent = "SYSTEM_PROTOCOL: DEFINITION";
-            document.getElementById('d-title').textContent = "GERGOV";
-            document.getElementById('d-body').innerHTML = `
-                <p><span class="acronym">G</span>LOBAL <span class="acronym">E</span>VENT <span class="acronym">R</span>EPORTING <span class="acronym">G</span>RID: <span class="acronym">O</span>UTLIER <span class="acronym">V</span>ERIFICATION</p>
-                <p style="margin-top: 40px; font-style: italic; color: var(--text-dim);">"Gergov serves as the digital herald, consolidating state-level communications into a single, auditable stream for public oversight."</p>`;
-            document.getElementById('d-evidence-block').style.display = 'none';
-            document.getElementById('d-refs').innerHTML = `<div class="ref-row"><div class="ref-label">VERSION</div><div class="ref-val">2.0.7</div></div>`;
             document.getElementById('slate').classList.add('active');
             document.querySelector('.close-slate').focus();
         }
 
+        // ── About page ──
+        function openAbout() {
+            document.querySelector('.slate-body').scrollTop = 0;
+            document.getElementById('d-id').textContent = 'SYSTEM_PROTOCOL: DEFINITION';
+            document.getElementById('d-title').textContent = 'GERGOV';
+            document.getElementById('d-body').innerHTML = `
+                <p><span class="acronym">G</span>LOBAL <span class="acronym">E</span>VENT <span class="acronym">R</span>EPORTING <span class="acronym">G</span>RID: <span class="acronym">O</span>UTLIER <span class="acronym">V</span>ERIFICATION</p>
+                <p style="margin-top:40px;font-style:italic;color:var(--text-dim);">"Gergov serves as the digital herald, consolidating state-level communications into a single, auditable stream for public oversight."</p>`;
+            document.getElementById('d-evidence-block').style.display = 'none';
+            document.getElementById('d-refs').innerHTML = `
+                <div class="ref-row"><div class="ref-label">VERSION</div><div class="ref-val">2.0.7</div></div>`;
+            document.getElementById('slate').classList.add('active');
+            document.querySelector('.close-slate').focus();
+        }
+
+        // ── Close slate ──
         function closeSlate() {
             document.getElementById('slate').classList.remove('active');
         }
 
-        // Close slate on Escape key
+        // Keyboard: Escape closes slate
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeSlate();
         });
