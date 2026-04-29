@@ -132,7 +132,7 @@
         async function loadFeed() {
             try {
                 // REPLACE WITH YOUR LIVE RENDER URL
-                const response = await fetch('https://your-backend.onrender.com/api/news');
+                const response = await fetch('https://gergov-brain.onrender.com/api/news');
                 articles = await response.json();
                 
                 document.getElementById('status').innerText = `NODE ONLINE // ${articles.length} SOURCES`;
