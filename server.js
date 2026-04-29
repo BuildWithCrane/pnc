@@ -7,7 +7,6 @@ const parser = new Parser();
 
 app.use(cors());
 
-// Nodes used for Outlier Verification
 const FEEDS = [
     { name: "BBC", url: "https://feeds.bbci.co.uk/news/world/rss.xml" },
     { name: "AL_JAZEERA", url: "https://www.aljazeera.com/xml/rss/all.xml" }
@@ -32,16 +31,14 @@ app.get('/api/news', async (req, res) => {
             const id = Math.random().toString(36).substr(2, 6).toUpperCase();
             let discrepancy = null;
 
-            // GERGOV: Outlier Verification Logic
             const match = compareItems.find(c => item.title.split(' ').slice(0,3).some(w => c.title.includes(w)));
             
             if (match) {
                 const timeA = new Date(item.pubDate);
                 const timeB = new Date(match.pubDate);
                 const diff = Math.abs(Math.floor((timeA - timeB) / 60000));
-                
                 if (diff > 5) {
-                    discrepancy = `TEMPORAL OUTLIER: BBC Node timestamp [${timeA.toLocaleTimeString()}] vs Al Jazeera Node [${timeB.toLocaleTimeString()}]. Variance of ${diff}m detected.`;
+                    discrepancy = `TEMPORAL OUTLIER: BBC [${timeA.toLocaleTimeString()}] vs Al Jazeera [${timeB.toLocaleTimeString()}]. Variance of ${diff}m detected.`;
                 }
             } else {
                 discrepancy = `SOURCE ISOLATION: Data identified on Primary Node (BBC), but no matching reporting strings found on Verification Node (ALJ).`;
