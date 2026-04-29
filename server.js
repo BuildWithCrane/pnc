@@ -22,12 +22,11 @@ app.get('/api/news', async (req, res) => {
         const results = await Promise.all(primaryItems.map(async (item) => {
             let fullText = "";
             try {
-                // Bruteforce selector to ensure 3+ paragraphs
                 const dom = await JSDOM.fromURL(item.link);
                 const pTags = dom.window.document.querySelectorAll('article p, .ssrcss-1q0mxy8-RichTextContainer p, .main-article-body p, [data-component="text-block"] p');
                 fullText = Array.from(pTags).map(p => p.textContent).join('\n\n');
             } catch (e) {
-                fullText = item.contentSnippet + "\n\n[EXTERNAL_NODE_FETCH_ERROR: Detailed dossier retrieval failed.]";
+                fullText = item.contentSnippet + "\n\n[EXTERNAL_NODE_FETCH_ERROR]";
             }
 
             const id = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -41,7 +40,6 @@ app.get('/api/news', async (req, res) => {
                 const timeB = new Date(match.pubDate);
                 const diff = Math.abs(Math.floor((timeA - timeB) / 60000));
                 
-                // Flag if reporting window varies by more than 5 minutes
                 if (diff > 5) {
                     discrepancy = `TEMPORAL OUTLIER: BBC Node timestamp [${timeA.toLocaleTimeString()}] vs Al Jazeera Node [${timeB.toLocaleTimeString()}]. Variance of ${diff}m detected.`;
                 }
@@ -70,5 +68,4 @@ app.get('/api/news', async (req, res) => {
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`GERGOV ENGINE ONLINE ON PORT ${PORT}`));
+app.listen(3000, () => console.log(`GERGOV ENGINE ONLINE // PORT 3000`));
