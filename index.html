@@ -24,7 +24,7 @@
             margin: 0; display: flex; height: 100vh; overflow: hidden;
         }
 
-        /* Navigation */
+/* Navigation */
         nav { 
             width: 240px; border-right: 1px solid var(--border); 
             padding: 20px; display: flex; flex-direction: column;
@@ -51,7 +51,7 @@
         .card-title { font-size: 22px; font-weight: 800; margin: 0 0 10px 0; color: var(--accent); line-height: 1.1; }
         .card-preview { font-size: 14px; color: var(--text-dim); max-width: 800px; }
 
-        /* Underline Logic from Sketch */
+        /* Underline Logic - Evidence Tracking */
         .high-red { border-bottom: 2px solid var(--red-line); font-weight: 700; color: var(--red-line); }
         .high-orange { border-bottom: 2px solid var(--orange-line); font-weight: 700; }
 
@@ -72,16 +72,18 @@
         }
 
         .dossier-id { font-family: monospace; font-size: 11px; color: var(--text-dim); margin-bottom: 20px; }
-        .dossier-title { font-size: 42px; font-weight: 900; line-height: 1; margin: 0 0 40px 0; }
-        .dossier-content { font-size: 18px; line-height: 1.7; color: #1a1a1a; }
+        .dossier-title { font-size: 42px; font-weight: 900; line-height: 1.1; margin: 0 0 40px 0; }
+        .dossier-content { font-size: 18px; line-height: 1.8; color: #1a1a1a; white-space: pre-wrap; }
 
-        /* The Findings/Discrepancy Box */
+        /* Mismatch Analysis Box */
         .findings-box {
             margin-top: 60px; padding: 25px; border: 1px solid var(--border);
             border-left: 5px solid var(--red-line); background: #fffcfc;
         }
-        .findings-box h4 { margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; color: var(--red-line); }
-        .findings-box ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; }
+        .findings-box h4 { margin: 0 0 15px 0; font-size: 11px; text-transform: uppercase; color: var(--red-line); letter-spacing: 1px; }
+        .findings-box ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: #333; }
+        .findings-box li { margin-bottom: 12px; list-style-type: square; }
+        .findings-box strong { color: #000; text-transform: uppercase; font-size: 12px; }
 
         .ref-row { margin-bottom: 25px; }
         .ref-label { font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
@@ -116,7 +118,7 @@
             <div id="d-body" class="dossier-content"></div>
             
             <div id="d-findings" class="findings-box" style="display:none;">
-                <h4>Discrepancy Analysis</h4>
+                <h4>Cross-Source Discrepancy Analysis</h4>
                 <ul id="findings-list"></ul>
             </div>
         </div>
