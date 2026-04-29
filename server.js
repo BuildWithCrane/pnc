@@ -1,68 +1,53 @@
 const express = require('express');
 const cors = require('cors');
 const Parser = require('rss-parser');
-const { JSDOM } = require('jsdom');
 const app = express();
 const parser = new Parser();
 
 app.use(cors());
 
-// Logic to "Scan" text and add highlights based on professional markers
-function scanAndHighlight(text) {
-    if (!text) return "";
-    
-    // Red Highlights: Conflict, Crisis, Warning markers
-    const redKeywords = [/conflict/gi, /stalled/gi, /crisis/gi, /denied/gi, /warning/gi, /military/gi];
-    // Orange Highlights: Temporal or Unverified markers
-    const orangeKeywords = [/unconfirmed/gi, /reported/gi, /pending/gi, /\d{1,2}:\d{2}/g, /sources claim/gi];
-
-    let highlighted = text;
-
-    redKeywords.forEach(regex => {
-        highlighted = highlighted.replace(regex, (match) => `<span class="high-red">${match}</span>`);
-    });
-
-    orangeKeywords.forEach(regex => {
-        highlighted = highlighted.replace(regex, (match) => `<span class="high-orange">${match}</span>`);
-    });
-
-    return highlighted;
-}
+// Definition of what we are looking for and WHY
+const intelRules = [
+    { regex: /conflict|military|strike|attack/gi, type: 'red', label: 'Security Alert', desc: 'Direct kinetic or security-related event detected.' },
+    { regex: /unconfirmed|sources claim|reported/gi, type: 'orange', label: 'Verification Pending', desc: 'Information is unverified by secondary nodes.' },
+    { regex: /\d{1,2}:\d{2}/g, type: 'orange', label: 'Temporal Marker', desc: 'Time-sensitive data requires cross-referencing for latency.' }
+];
 
 app.get('/api/news', async (req, res) => {
     try {
         const feed = await parser.parseURL('https://feeds.bbci.co.uk/news/world/rss.xml');
         
         const articles = feed.items.map(item => {
-            const id = Math.random().toString(36).substr(2, 6).toUpperCase();
-            
-            // We use the snippet provided by the RSS feed for the body
-            const rawBody = item.contentSnippet || "No data string available.";
-            const processedBody = scanAndHighlight(rawBody);
+            let bodyText = item.contentSnippet || "";
+            let findings = [];
+
+            // Apply highlighting and collect explanations
+            intelRules.forEach(rule => {
+                if (rule.regex.test(bodyText)) {
+                    findings.push(`${rule.label}: ${rule.desc}`);
+                    bodyText = bodyText.replace(rule.regex, (match) => 
+                        `<span class="high-${rule.type}">${match}</span>`
+                    );
+                }
+            });
 
             return {
-                id: id,
-                source: "BBC WORLD SERVICE",
-                node: `GLO-SEC-${id}`,
-                topic: "GEOPOLITICS",
-                title: item.title.toUpperCase(),
-                summary: item.contentSnippet ? item.contentSnippet.substring(0, 150) + "..." : "",
-                body: processedBody,
-                timestamp: new Date(item.pubDate).toISOString().replace('T', ' ').substring(0, 19),
-                // Only flag a discrepancy if actual "Conflict" keywords were found
-                discrepancy: rawBody.toLowerCase().includes('conflict') ? "LATENCY WARNING: Factual divergence detected in local reporting nodes." : null,
+                id: Math.random().toString(36).substr(2, 6).toUpperCase(),
+                source: "BBC WORLD",
+                title: item.title,
+                body: bodyText,
+                timestamp: new Date(item.pubDate).toLocaleString(),
+                findings: findings, // This is the explanation list
                 refs: [
-                    { label: "Classification", val: "RESTRICTED" },
-                    { label: "Reliability", val: rawBody.length > 200 ? "HIGH" : "MEDIUM" },
-                    { label: "Internal ID", val: `GERG-${id}` }
+                    { label: "Classification", val: "OFFICIAL" },
+                    { label: "Reliability", val: findings.length > 0 ? "SCRUTINY REQUIRED" : "STABLE" }
                 ]
             };
         });
         res.json(articles);
     } catch (err) {
-        res.status(500).json({ error: "INTEGRITY_FAIL" });
+        res.status(500).json({ error: "FEED_SYNC_ERROR" });
     }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('GERGOV ANALYTICS ONLINE'));
+app.listen(3000, () => console.log('GERGOV ANALYTICS ONLINE'));
