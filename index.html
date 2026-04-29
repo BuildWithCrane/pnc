@@ -270,10 +270,18 @@
 
         let articles = [];
 
-        // ── Sanitise user/server content before DOM injection ──
-        function sanitiseText(str) {
+        // ── Decode HTML entities from RSS (e.g. &#x27; → ', &amp; → &) ──
+        function decodeEntities(str) {
             const div = document.createElement('div');
-            div.textContent = String(str ?? '');
+            div.innerHTML = String(str ?? '');
+            return div.textContent;
+        }
+
+        // ── Sanitise: decode first, then re-encode for safe injection ──
+        function sanitiseText(str) {
+            const decoded = decodeEntities(str);
+            const div = document.createElement('div');
+            div.textContent = decoded;
             return div.innerHTML;
         }
 
@@ -287,7 +295,7 @@
 
         // ── Convert normalised plain text to paragraphs ──
         function textToParagraphs(text) {
-            return normaliseBody(text)
+            return normaliseBody(decodeEntities(text))
                 .split('\n\n')
                 .filter(Boolean)
                 .map(para => `<p>${sanitiseText(para)}</p>`)
