@@ -2,152 +2,160 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GERGOV | INTEL TERMINAL</title>
     <style>
         :root {
-            --bg: #f5f5f3; 
-            --sidebar-bg: #ecece9;
-            --text: #1a1a1a;
-            --border: #bcbcbc;
-            --red: #c62828;
-            --orange: #ef6c00;
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text: #1c1e21;
+            --accent: #1a0dab;
+            --border: #dddfe2;
+            --red: #d93025;
+            --orange: #f29900;
         }
 
-        * { box-sizing: border-box; }
-        body { font-family: "Times New Roman", Times, serif; background: var(--bg); color: var(--text); margin: 0; }
-
-        /* Navigation */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        
         header { 
-            padding: 15px 40px; border-bottom: 2px solid #000; 
-            display: flex; justify-content: space-between; align-items: center;
-            background: #fff; position: sticky; top: 0; z-index: 100;
+            background: #fff; padding: 20px 40px; border-bottom: 3px solid #000; 
+            display: flex; justify-content: space-between; align-items: baseline;
         }
+        .logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
 
-        /* Feed */
-        main { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .col-title { font-weight: 800; text-transform: uppercase; font-size: 11px; color: #606770; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 5px;}
+
+        /* Feed Cards */
         .card { 
-            background: #fff; border: 1px solid var(--border); padding: 30px; 
-            margin-bottom: 25px; cursor: pointer; transition: transform 0.1s;
+            background: #fff; border: 1px solid var(--border); padding: 20px; 
+            margin-bottom: 15px; cursor: pointer; transition: 0.1s;
         }
-        .card:hover { border-color: #000; transform: translateY(-2px); }
-        .card-meta { font-family: Arial, sans-serif; font-size: 11px; font-weight: bold; color: #777; margin-bottom: 10px; }
-        .card-title { font-size: 24px; font-weight: bold; margin: 0; line-height: 1.1; }
+        .card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card-meta { font-size: 11px; font-weight: bold; color: #606770; margin-bottom: 8px; }
+        .card-title { font-size: 19px; font-weight: 800; margin: 0; color: var(--accent); }
 
-        /* THE SLATE (Full Screen Dossier) */
+        /* FULL SCREEN SLATE (From your sketch) */
         #slate {
             position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
-            background: var(--bg); z-index: 1000; transition: left 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            display: flex;
+            background: #fff; z-index: 1000; transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: grid; grid-template-columns: 1fr 320px;
         }
         #slate.active { left: 0; }
 
-        .dossier-main { 
-            flex: 1; padding: 80px 10%; overflow-y: auto; 
-            border-right: 2px solid #000; position: relative;
-        }
-        .dossier-sidebar { width: 350px; background: var(--sidebar-bg); padding: 80px 40px; }
+        .slate-main { padding: 60px 80px; overflow-y: auto; border-right: 1px solid var(--border); position: relative; }
+        .slate-side { background: #f9f9f9; padding: 60px 30px; }
 
         .close-btn { 
-            position: absolute; top: 30px; left: 40px; cursor: pointer; 
-            font-family: Arial, sans-serif; font-size: 12px; font-weight: 900; 
-            border: 1px solid #000; padding: 5px 15px; background: #fff;
+            position: absolute; top: 25px; left: 30px; cursor: pointer; 
+            font-size: 11px; font-weight: 900; text-transform: uppercase; border: 1px solid #000; padding: 6px 12px;
         }
 
-        /* Dynamic Highlighting from your sketch */
-        .high-red { border-bottom: 2px solid var(--red); color: var(--red); font-weight: bold; }
-        .high-orange { border-bottom: 2px solid var(--orange); background: rgba(239, 108, 0, 0.1); }
+        /* Underlining styles from sketch */
+        .high-red { border-bottom: 2px solid var(--red); color: var(--red); font-weight: 600; }
+        .high-orange { border-bottom: 2px solid var(--orange); font-weight: 600; }
 
-        .doc-header { font-family: monospace; font-size: 12px; margin-bottom: 30px; border-bottom: 1px solid #aaa; padding-bottom: 10px; }
-        .doc-title { font-size: 48px; font-weight: bold; margin-bottom: 40px; line-height: 1; }
-        .doc-body { font-size: 20px; line-height: 1.7; }
+        h1 { font-size: 36px; font-weight: 800; line-height: 1.1; margin: 40px 0 30px 0; }
+        .content { font-size: 17px; line-height: 1.6; color: #333; }
 
-        .ref-section { margin-bottom: 40px; }
-        .ref-label { font-family: Arial, sans-serif; font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; }
-        .ref-value { font-size: 16px; font-weight: bold; margin-top: 5px; }
-
-        .discrepancy-footer { 
-            margin-top: 60px; padding: 25px; border: 1px dashed var(--red); 
-            background: rgba(198, 40, 40, 0.05); font-family: monospace;
+        /* The Explanation Box */
+        .findings-box { 
+            margin-top: 50px; padding: 20px; border: 1px solid var(--border); 
+            border-left: 5px solid var(--red); background: #fffcfc;
         }
+        .findings-box h4 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--red); }
+        .findings-box ul { margin: 0; padding-left: 18px; font-size: 14px; color: #555; }
+
+        .ref-item { margin-bottom: 20px; }
+        .ref-label { font-size: 10px; font-weight: 800; color: #90949c; text-transform: uppercase; }
+        .ref-val { font-size: 14px; font-weight: 700; margin-top: 3px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight: 900; font-size: 20px; letter-spacing: -1px;">GERGOV // INTEL</div>
-    <div id="status" style="font-family: monospace; font-size: 11px;">SYNCING_NODES...</div>
+    <div class="logo">GERGOV.EU // INTEL</div>
+    <div id="status" style="font-size: 10px; font-weight: bold; color: #90949c;">SYSTEM_SYNC: PENDING...</div>
 </header>
 
-<main id="feed-root"></main>
+<main>
+    <div class="col-title">Latest Collective Intelligence</div>
+    <div id="feed-container"></div>
+</main>
 
 <div id="slate">
-    <div class="dossier-main">
-        <div class="close-btn" onclick="closeSlate()">← BACK TO FEED</div>
-        <div id="d-header" class="doc-header"></div>
-        <h1 id="d-title" class="doc-title"></h1>
-        <div id="d-body" class="doc-body"></div>
-        <div id="d-footer"></div>
+    <div class="slate-main">
+        <div class="close-btn" onclick="closeSlate()">← Return to Feed</div>
+        <div id="d-meta" class="card-meta" style="margin-top: 40px;"></div>
+        <h1 id="d-title"></h1>
+        <div id="d-body" class="content"></div>
+        
+        <div id="d-findings" class="findings-box" style="display:none;">
+            <h4>Analysis & Findings</h4>
+            <ul id="findings-list"></ul>
+        </div>
     </div>
-    <aside class="dossier-sidebar">
-        <div style="font-family: Arial; font-weight: 900; font-size: 12px; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 30px;">REFERENCE LIBRARY</div>
+    <aside class="slate-side">
+        <div class="col-title">Reference Library</div>
         <div id="d-refs"></div>
     </aside>
 </div>
 
 <script>
-    let currentData = [];
+    let articles = [];
 
-    async function updateIntel() {
+    async function init() {
         try {
+            // Replace with your Render URL
             const res = await fetch('https://gergov-brain.onrender.com/api/news');
-            currentData = await res.json();
-            document.getElementById('status').innerText = `SYNC_COMPLETE // NODES: ${currentData.length}`;
-            renderCards();
+            articles = await res.json();
+            document.getElementById('status').innerText = `SYSTEM_SYNC: ONLINE [${articles.length} NODES]`;
+            
+            const container = document.getElementById('feed-container');
+            container.innerHTML = articles.map(a => `
+                <div class="card" onclick="openArticle('${a.id}')">
+                    <div class="card-meta">${a.source} // ${a.timestamp}</div>
+                    <h3 class="card-title">${a.title}</h3>
+                </div>
+            `).join('');
         } catch (e) {
-            document.getElementById('status').innerText = "SYNC_FAILED";
+            document.getElementById('status').innerText = "SYSTEM_SYNC: OFFLINE";
         }
     }
 
-    function renderCards() {
-        const root = document.getElementById('feed-root');
-        root.innerHTML = currentData.map(item => `
-            <div class="card" onclick="openSlate('${item.id}')">
-                <div class="card-meta">${item.source} // ${item.timestamp}</div>
-                <h3 class="card-title">${item.title}</h3>
-            </div>
-        `).join('');
-    }
+    function openArticle(id) {
+        const a = articles.find(x => x.id === id);
+        document.getElementById('d-meta').innerText = `${a.source} // DATA_NODE: ${a.id} // ${a.timestamp}`;
+        document.getElementById('d-title').innerText = a.title;
+        document.getElementById('d-body').innerHTML = a.body;
 
-    function openSlate(id) {
-        const item = currentData.find(x => x.id === id);
-        document.getElementById('d-header').innerText = `ID: ${item.node} // CLASSIFICATION: RESTRICTED`;
-        document.getElementById('d-title').innerText = item.title;
-        document.getElementById('d-body').innerHTML = item.body;
-        
-        document.getElementById('d-refs').innerHTML = item.refs.map(r => `
-            <div class="ref-section">
+        // Populate Explanations
+        const findingsDiv = document.getElementById('d-findings');
+        const list = document.getElementById('findings-list');
+        if (a.findings.length > 0) {
+            findingsDiv.style.display = 'block';
+            list.innerHTML = a.findings.map(f => `<li>${f}</li>`).join('');
+        } else {
+            findingsDiv.style.display = 'none';
+        }
+
+        // Sidebar Refs
+        document.getElementById('d-refs').innerHTML = a.refs.map(r => `
+            <div class="ref-item">
                 <div class="ref-label">${r.label}</div>
-                <div class="ref-value">${r.val}</div>
+                <div class="ref-val">${r.val}</div>
             </div>
         `).join('');
-
-        const foot = document.getElementById('d-footer');
-        foot.innerHTML = item.discrepancy ? `
-            <div class="discrepancy-footer">
-                <span style="color:var(--red); font-weight:bold;">● ALERT: DISCREPANCY FOUND</span><br><br>
-                ${item.discrepancy}
-            </div>` : '';
 
         document.getElementById('slate').classList.add('active');
-        window.scrollTo(0, 0);
+        document.body.style.overflow = 'hidden';
     }
 
     function closeSlate() {
         document.getElementById('slate').classList.remove('active');
+        document.body.style.overflow = 'auto';
     }
 
-    updateIntel();
+    init();
 </script>
 
 </body>
